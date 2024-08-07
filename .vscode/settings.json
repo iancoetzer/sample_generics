@@ -3,5 +3,21 @@
     "azureFunctions.projectLanguage": "C#",
     "azureFunctions.projectRuntime": "~4",
     "debug.internalConsoleOptions": "neverOpen",
-    "azureFunctions.preDeployTask": "publish (functions)"
+    "azureFunctions.preDeployTask": "publish (functions)",
+    "files.exclude": {
+        "__.json": true,
+        "__blobstorage__": true,
+        "__queuestorage__": true,
+        ".gitattributes": true,
+        ".github": true,
+        ".gitignore": true,
+        "*__.json": true,
+        "**/bin": true,
+        "**/obj": true,
+        "/obj": true,
+        "bin": true,
+        "obj": true,
+        "obj*": true,
+        "obj\\": true
+    }    
 }

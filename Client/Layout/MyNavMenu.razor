@@ -1,0 +1,25 @@
+<MudPaper Width="250px" Class="d-inline-flex py-3 pr-4 " Elevation="0">
+    <MudNavMenu Class="mud-width-full ">
+        <MudText Typo="Typo.h6" Class="px-4">Menu</MudText>
+        <MudText Typo="Typo.body2" Class="px-4 mud-text-secondary">Samples</MudText>
+        <MudDivider Class="my-2" />
+        
+        <MudNavLink Href="/home" Icon="@Icons.Material.Filled.Dashboard">Home</MudNavLink>
+        <MudNavLink Href="/fetchdata" Icon="@Icons.Material.Filled.Dashboard">Weather</MudNavLink>
+        <MudNavLink Href="/counter" Icon="@Icons.Material.Filled.Storage">Counter</MudNavLink>
+
+        <MudNavGroup Title="Generics" Icon="@Icons.Material.Filled.Settings" Expanded="true">
+            <MudNavLink Href="/person" Icon="@Icons.Material.Filled.EmojiPeople" IconColor="Color.Success">People</MudNavLink>
+            <MudNavLink Href="/fruit" Icon="@Icons.Custom.Uncategorized.FoodApple" IconColor="Color.Error">Fruit</MudNavLink>
+        </MudNavGroup>          
+
+        @*
+        <MudNavLink Href="/billing" Icon="@Icons.Material.Filled.Receipt" Disabled="true">Billing</MudNavLink>
+        <MudNavGroup Title="Settings" Icon="@Icons.Material.Filled.Settings" Expanded="true">
+            <MudNavLink Href="/users" Icon="@Icons.Material.Filled.People" IconColor="Color.Success">Users</MudNavLink>
+            <MudNavLink Href="/security" Icon="@Icons.Material.Filled.Security" IconColor="Color.Info">Security</MudNavLink>
+        </MudNavGroup>        
+        *@
+
+    </MudNavMenu>
+</MudPaper>

@@ -1,0 +1,137 @@
+﻿@page "/fruit"
+
+@using System.Text
+@using System.Text.Json
+@using System.Text.Json.Serialization 
+@using System.Collections.Generic
+
+@using BlazorApp.Shared
+
+@inject HttpClient Http
+
+<PageTitle>Generics Sample</PageTitle>
+
+<MudTable 
+        ServerData="@(new Func<TableState,CancellationToken, Task<TableData<Fruit>>>(ServerReload))"
+        ReadOnly=true
+        LoadingProgressColor = "Color.Primary"
+        Dense="true" Hover="true" @ref="table"
+        Breakpoint="Breakpoint.None" Striped="true"
+        >
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Fruit</MudText>
+        <MudSpacer />
+    
+        <MudTextField T="string" OnKeyDown="HandleKeyDown" Placeholder="Search" 
+                    @bind-Value="searchString"
+                    AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-2"></MudTextField>
+
+        <MudTooltip Text="Clear Search">
+            <MudIconButton Icon="@Icons.Material.Filled.FilterAltOff" 
+                Color="Color.Primary" aria-label="github" OnClick="ClearFilter">
+            </MudIconButton>
+        </MudTooltip>
+    </ToolBarContent>
+    <HeaderContent>
+        
+        <MudTh><MudTableSortLabel SortLabel="name_field" T="Fruit">Name</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortLabel="color_field" T="Fruit">Color</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortLabel="weight_field" T="Fruit">Weight</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortLabel="taste_field" T="Fruit">Taste</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortLabel="season_field" T="Fruit">Season</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortLabel="nutritionalvalue_field" T="Fruit">Nutritional Value</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortLabel="isripe_field" T="Fruit">Is Ripe</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortLabel="price_field" T="Fruit">Price</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortLabel="stockdate_field" T="Fruit" style="white-space: nowrap;">Stock Date</MudTableSortLabel></MudTh>
+
+    </HeaderContent>
+    <RowTemplate Context = "row"> 
+
+        <MudTd DataLabel="Name">@row.Name</MudTd>
+        <MudTd DataLabel="Name">@row.Color</MudTd>
+        <MudTd DataLabel="Name">@row.Weight.ToString("N2")</MudTd>
+        <MudTd DataLabel="Name">@row.Taste</MudTd>
+        <MudTd DataLabel="Name">@row.Season</MudTd>
+        <MudTd DataLabel="Name">@row.NutritionalValue</MudTd>
+        <MudTd DataLabel="Name">@row.IsRipe</MudTd>
+        <MudTd DataLabel="Name">@row.Price.ToString("N2")</MudTd>
+        
+        <MudTd DataLabel="Stock Date">@row.StockDate?.ToString("yyyy/MM/dd")</MudTd>
+
+    </RowTemplate>
+
+    <NoRecordsContent>
+        <MudText>No matching records found</MudText>
+    </NoRecordsContent>
+    <LoadingContent>
+        <MudText>Loading...</MudText>
+    </LoadingContent>
+    <PagerContent>
+        <MudTablePager PageSizeOptions="@TablePageSizeOptions"  />
+    </PagerContent>
+</MudTable>
+
+@code {
+    private MudTable<Fruit>? table;
+    private string searchString = "";
+    private int[] TablePageSizeOptions = [10,20,25,50,100];  
+
+    private async Task<TableData<Fruit>> ServerReload(TableState state, CancellationToken token)
+    {
+        await Task.Delay(250);
+
+        var payload = new {
+            searchString = searchString,
+            sortLabel = state.SortLabel,
+            sortDirection = state.SortDirection, 
+            page = state.Page, 
+            pageSize = state.PageSize, 
+            searchFields = new List<string> { "Name","Color","Weight","Taste","Season","NutritionalValue","IsRipe","Price", "StockDate"},
+            sortFields = new Dictionary<string, string>{ ["name_field"]="Name", 
+                ["color_field"]="Color", 
+                ["weight_field"]="Weight", 
+                ["taste_field"]="Taste", 
+                ["season_field"]="Season", 
+                ["nutritionalvalue_field"]="NutritionalValue", 
+                ["isripe_field"]="IsRipe", 
+                ["price_field"]="Price", 
+                ["stockdate_field"]="StockDate" }
+        };     
+
+        string jsonPayload = JsonSerializer.Serialize(payload);
+        HttpContent content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+        HttpResponseMessage response = await Http.PostAsync("api/GetFruit", content);            
+
+        if(response.IsSuccessStatusCode)
+        {
+            string responseBody = await response.Content.ReadAsStringAsync(); 
+            var responseObject = JsonSerializer.Deserialize<Tuple<Fruit[], int>>(responseBody) ?? new Tuple<Fruit[], int>(Array.Empty<Fruit>(), 0);                  
+
+            if (state.SortLabel == null)    
+                return new TableData<Fruit>(){Items = responseObject.Item1.ToList().OrderBy(x=>x.Name), TotalItems = responseObject.Item2}; 
+            else 
+                return new TableData<Fruit>(){Items = responseObject.Item1, TotalItems = responseObject.Item2};                       
+        }              
+        else 
+        {
+            // good idea to use something like the snack bar to notify the user that something went wrong
+            return new TableData<Fruit>(){Items = [], TotalItems = 0};            
+        }        
+    }    
+
+    private void HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            if (table != null)
+                table.ReloadServerData();
+        }
+    }    
+
+    private void ClearFilter()
+    {
+        searchString = string.Empty;
+        if (table != null)
+            table.ReloadServerData();
+    }
+}

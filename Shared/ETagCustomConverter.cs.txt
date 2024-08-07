@@ -1,0 +1,32 @@
+using System;
+using Azure;
+using Azure.Data.Tables;
+using Newtonsoft.Json;
+
+namespace BlazorApp.Shared
+{
+    public class ETagCustomConverter : JsonConverter
+    {
+        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
+        {
+            string eTag = value?.ToString()??"";
+            
+            serializer.Serialize(writer, eTag); 
+        }
+
+        public override object ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
+        {
+            ETag result = new ETag(string.Empty);
+
+            if (reader!=null)
+                if (reader.Value != null)
+                    result = new ETag(reader.Value.ToString()??"");
+            
+            return result;
+        }
+
+        public override bool CanRead => true;
+
+        public override bool CanConvert(Type objectType) => objectType == typeof(ETag);
+    }    
+}

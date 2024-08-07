@@ -2,11 +2,29 @@
 
 <PageTitle>Counter</PageTitle>
 
-<h1>Counter</h1>
 
-<p role="status">Current count: @currentCount</p>
+<MudGrid Justify="Justify.Center">
+    <MudItem xs="12">
+        <MudPaper Class="d-flex align-center justify-center mud-width-full py-2" Elevation="0">
+            <h1>Counter</h1>
+        </MudPaper>
+        @*
+        <MudPaper Class="d-flex align-center justify-center mud-width-full py-8">xs=12</MudPaper>
+        *@
+    </MudItem>
 
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+    <MudItem xs="12">
+        <MudPaper Class="d-flex align-center justify-center mud-width-full py-2" Elevation="0">
+            <p role="status">Current count: @currentCount</p>
+        </MudPaper>            
+    </MudItem>
+
+    <MudItem xs="12">
+        <MudPaper Class="d-flex align-center justify-center mud-width-full py-2">
+            <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+        </MudPaper>            
+    </MudItem>
+</MudGrid>          
 
 @code {
     private int currentCount = 0;

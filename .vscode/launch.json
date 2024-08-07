@@ -5,7 +5,8 @@
             "name": "Launch and Debug Standalone Blazor WebAssembly App",
             "type": "blazorwasm",
             "request": "launch",
-            "cwd": "${workspaceFolder}/Client"
+            "cwd": "${workspaceFolder}/Client",
+            "timeout": 100000
         },
         {
             "name": "Attach to .NET Functions",
@@ -20,7 +21,8 @@
         "configurations": [
           "Attach to .NET Functions",
           "Launch and Debug Standalone Blazor WebAssembly App"
-        ]
+        ],
+        "stopAll": true
       }
     ]
   }

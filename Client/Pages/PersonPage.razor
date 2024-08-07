@@ -1,0 +1,122 @@
+﻿@page "/person"
+
+@using System.Text
+@using System.Text.Json
+@using System.Text.Json.Serialization 
+@using System.Collections.Generic
+
+@using BlazorApp.Shared
+
+@inject HttpClient Http
+
+<PageTitle>Generics Sample</PageTitle>
+
+<MudTable 
+        ServerData="@(new Func<TableState,CancellationToken, Task<TableData<Person>>>(ServerReload))"
+        ReadOnly=true
+        LoadingProgressColor = "Color.Primary"
+        Dense="true" Hover="true" @ref="table"
+        Breakpoint="Breakpoint.None" Striped="true"
+        >
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">People</MudText>
+        <MudSpacer />
+    
+        <MudTextField T="string" OnKeyDown="HandleKeyDown" Placeholder="Search" 
+                    @bind-Value="searchString"
+                    AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-2"></MudTextField>
+
+        <MudTooltip Text="Clear Search">
+            <MudIconButton Icon="@Icons.Material.Filled.FilterAltOff" 
+                Color="Color.Primary" aria-label="github" OnClick="ClearFilter">
+            </MudIconButton>
+        </MudTooltip>
+    </ToolBarContent>
+    <HeaderContent>
+        
+        <MudTh><MudTableSortLabel SortLabel="firstname_field" T="Person">First Name</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortLabel="lastname_field" T="Person">Last Name</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortLabel="email_field" T="Person">Email</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortLabel="birthdate_field" T="Person" style="white-space: nowrap;">Birth Date</MudTableSortLabel></MudTh>
+
+    </HeaderContent>
+    <RowTemplate Context = "row"> 
+
+        <MudTd DataLabel="FirstName">@row.FirstName</MudTd>
+        <MudTd DataLabel="LastName">@row.LastName</MudTd>
+        <MudTd DataLabel="Email">@row.Email</MudTd>
+        <MudTd DataLabel="BirthDate">@row.BirthDate?.ToString("yyyy/MM/dd")</MudTd>
+
+    </RowTemplate>
+
+    <NoRecordsContent>
+        <MudText>No matching records found</MudText>
+    </NoRecordsContent>
+    <LoadingContent>
+        <MudText>Loading...</MudText>
+    </LoadingContent>
+    <PagerContent>
+        <MudTablePager PageSizeOptions="@TablePageSizeOptions"  />
+    </PagerContent>
+</MudTable>
+
+@code {
+    private MudTable<Person>? table;
+    private string searchString = "";
+    private int[] TablePageSizeOptions = [10,20,25,50,100];  
+
+    private async Task<TableData<Person>> ServerReload(TableState state, CancellationToken token)
+    {
+        await Task.Delay(250);
+
+        var payload = new {
+            searchString = searchString,
+            sortLabel = state.SortLabel,
+            sortDirection = state.SortDirection, 
+            page = state.Page, 
+            pageSize = state.PageSize, 
+            searchFields = new List<string> { "FirstName","LastName", "Email", "BirthDate"},
+            sortFields = new Dictionary<string, string> { 
+                ["firstname_field"]="FirstName", 
+                ["lastname_field"]="LastName", 
+                ["email_field"]="Email", 
+                ["birthdate_field"]="BirthDate"}
+        };     
+
+        string jsonPayload = JsonSerializer.Serialize(payload);
+        HttpContent content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+        HttpResponseMessage response = await Http.PostAsync("api/GetPeople", content);            
+
+        if(response.IsSuccessStatusCode)
+        {
+            string responseBody = await response.Content.ReadAsStringAsync(); 
+            var responseObject = JsonSerializer.Deserialize<Tuple<Person[], int>>(responseBody) ?? new Tuple<Person[], int>(Array.Empty<Person>(), 0);                  
+
+            if (state.SortLabel == null)    
+                return new TableData<Person>(){Items = responseObject.Item1.ToList().OrderBy(x=>x.LastName).ThenBy(x=>x.FirstName), TotalItems = responseObject.Item2}; 
+            else 
+                return new TableData<Person>(){Items = responseObject.Item1, TotalItems = responseObject.Item2};                       
+        }              
+        else 
+        {
+            // good idea to use something like the snack bar to notify the user that something went wrong
+            return new TableData<Person>(){Items = [], TotalItems = 0};            
+        }        
+    }    
+
+    private void HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            if (table != null)
+                table.ReloadServerData();
+        }
+    }    
+
+    private void ClearFilter()
+    {
+        searchString = string.Empty;
+        if (table != null)
+            table.ReloadServerData();
+    }
+}
