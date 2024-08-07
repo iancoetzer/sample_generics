@@ -10,41 +10,15 @@
 @* Needed for snackbars *@
 <MudSnackbarProvider />
 
-@*
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
-
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
-
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
-*@
-
 <MudLayout>
     <MudAppBar>
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
-        
         <a href="/" style="text-decoration: none; color: inherit;">Generics Sample</a>
     </MudAppBar>
     <MudDrawer @bind-Open="@_drawerOpen" Class="overflow-hidden">
         <MyNavMenu/>
     </MudDrawer>
     <MudMainContent>
-        @*Class=" justify-center align-center pt-2 ml-2 mr-2"*@
-        @*
-        <MudContainer MaxWidth="MaxWidth.Large"  >
-            
-        </MudContainer>
-        *@
-
         @Body
     </MudMainContent>
 </MudLayout>

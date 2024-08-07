@@ -2,7 +2,6 @@
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization ;
-//using Newtonsoft.Json;
 using Azure.Data.Tables;
 using Azure;
 using BlazorApp.Shared.Converters;
@@ -35,9 +34,7 @@ namespace BlazorApp.Shared
         public string NutritionalValue { get; set; } = string.Empty;
         public bool IsRipe { get; set; }
         public decimal Price { get; set; }
- 
         
-
         // Default Constructor
         public Fruit()
         {

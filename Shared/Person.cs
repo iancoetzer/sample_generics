@@ -2,7 +2,6 @@ using System;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization ;
-//using Newtonsoft.Json;
 using Azure.Data.Tables;
 using Azure;
 using BlazorApp.Shared.Converters;
@@ -17,7 +16,6 @@ namespace BlazorApp.Shared
 
         public DateTimeOffset? Timestamp { get; set; }
 
-        //[JsonConverter(typeof(ETagCustomConverter))]
         [JsonConverter(typeof(ETagConverter))]
         public ETag ETag {get;set;}
 
