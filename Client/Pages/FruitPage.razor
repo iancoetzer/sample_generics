@@ -6,6 +6,7 @@
 @using System.Collections.Generic
 
 @using BlazorApp.Shared
+@using BlazorApp.Shared.DTO
 
 @inject HttpClient Http
 
@@ -105,12 +106,12 @@
         if(response.IsSuccessStatusCode)
         {
             string responseBody = await response.Content.ReadAsStringAsync(); 
-            var responseObject = JsonSerializer.Deserialize<Tuple<Fruit[], int>>(responseBody) ?? new Tuple<Fruit[], int>(Array.Empty<Fruit>(), 0);                  
+            var responseObject = JsonSerializer.Deserialize<PagedDTO<Fruit>>(responseBody) ?? new PagedDTO<Fruit>(){PagedItems = [], TotalItems = 0};
 
             if (state.SortLabel == null)    
-                return new TableData<Fruit>(){Items = responseObject.Item1.ToList().OrderBy(x=>x.Name), TotalItems = responseObject.Item2}; 
+                return new TableData<Fruit>(){Items = responseObject.PagedItems.ToList().OrderBy(x=>x.Name), TotalItems = responseObject.TotalItems}; 
             else 
-                return new TableData<Fruit>(){Items = responseObject.Item1, TotalItems = responseObject.Item2};                       
+                return new TableData<Fruit>(){Items = responseObject.PagedItems, TotalItems = responseObject.TotalItems};                       
         }              
         else 
         {

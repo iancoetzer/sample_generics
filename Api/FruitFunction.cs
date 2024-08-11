@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Bogus;
 using Azure;
 using BlazorApp.Shared.Helpers;
+using BlazorApp.Shared.DTO;
 
 namespace Api
 {
@@ -62,6 +63,8 @@ namespace Api
                         var genericMethodAction = genericMethod.MakeGenericMethod(type); 
                         if (genericMethodAction != null) 
                         {
+                            Type tupleType = typeof(Tuple<,>).MakeGenericType(type.MakeArrayType(), typeof(int));
+                            
                             var pagedData = genericMethodAction.Invoke(this, [
                                 data.AsEnumerable(), 
                                 MyPost.searchString, 
@@ -71,10 +74,17 @@ namespace Api
                                 MyPost.pageSize, 
                                 MyPost.searchFields, 
                                 MyPost.sortFields 
-                            ]); 
+                            ])!; // Null-forgiving operator 
+
+                            var mytuple = (dynamic)Convert.ChangeType(pagedData, tupleType);
+
+                            Type pagedDtoType = typeof(PagedDTO<>).MakeGenericType(type);
+                            var dto = Activator.CreateInstance(pagedDtoType)!; // Null-forgiving operator
+                            pagedDtoType.GetProperty("PagedItems")?.SetValue(dto, mytuple.Item1);
+                            pagedDtoType.GetProperty("TotalItems")?.SetValue(dto, mytuple.Item2);                            
 
                             var response = req.CreateResponse(HttpStatusCode.OK);
-                            await response.WriteAsJsonAsync(pagedData);
+                            await response.WriteAsJsonAsync(dto);
 
                             return response;                        
                         }
